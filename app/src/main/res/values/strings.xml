@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Rss Hawk</string>
+    <string name="content_authority">com.example.liding.rsshawk.app</string>
+    <string name="sync_account_type">rsshawk.example.com</string>
+
+    <string name="read_more">Read more...</string>
+</resources>
