@@ -27,7 +27,6 @@ import java.util.Vector;
 public class RssReaderAdapter extends AbstractThreadedSyncAdapter {
 
     private String LOG_TAG = "RssReaderAdapter";
-    private static Account mAccount;
 
     public static final int SYNC_INTERVAL = 6;//60 * 180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
@@ -127,10 +126,10 @@ public class RssReaderAdapter extends AbstractThreadedSyncAdapter {
     public static Account getSyncAccount(Context context) {
         AccountManager accountManager =
             (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
-        if (mAccount == null) {
-            mAccount = new Account(
-                    context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
-        }
+        Account mAccount = new Account(
+            context.getString(R.string.app_name),
+            context.getString(R.string.sync_account_type)
+        );
         if ( null == accountManager.getPassword(mAccount) ) {
             if (!accountManager.addAccountExplicitly(mAccount, "", null)) {
                 return null;

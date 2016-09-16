@@ -47,11 +47,11 @@ public class RssProvider extends ContentProvider {
                     null,
                     null,
                     sortOrder);
+                retCursor.setNotificationUri(getContext().getContentResolver(), RssContract.RssEntry.CONTENT_URI);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         Log.d("DB", "return retCursor - " + retCursor.getCount());
         return retCursor;
     }
@@ -82,7 +82,6 @@ public class RssProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
         return returnUri;
     }
 
@@ -129,9 +128,6 @@ public class RssProvider extends ContentProvider {
                 int returnCount = 0;
                 try {
                     for (ContentValues value : values) {
-//                        for (String key : value.keySet()) {
-//                            Log.d("RssProvider", "key - " + key + " value - "+ value.getAsString(key));
-//                        }
                         Uri insertUri = insert(RssContract.RssEntry.CONTENT_URI, value);
                         if (insertUri != null) {
                             returnCount++;
@@ -142,7 +138,7 @@ public class RssProvider extends ContentProvider {
                     db.endTransaction();
                 }
                 Log.d("DB", "bulkInsert - notifyAll");
-                getContext().getContentResolver().notifyChange(uri, null);
+                getContext().getContentResolver().notifyChange(RssContract.RssEntry.CONTENT_URI, null);
                 return returnCount;
             default:
                 return super.bulkInsert(uri, values);

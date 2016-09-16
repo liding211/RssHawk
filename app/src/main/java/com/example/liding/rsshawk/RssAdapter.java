@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -48,14 +49,12 @@ public class RssAdapter extends CursorAdapter {
         public final TextView titleView;
         public final TextView descriptionView;
         public final TextView dateView;
-        public final TextView readMoreView;
 
         public ViewHolder(View view) {
             imageView = (ImageView) view.findViewById(R.id.list_item_image);
             titleView = (TextView) view.findViewById(R.id.list_item_title);
             descriptionView = (TextView) view.findViewById(R.id.list_item_description);
             dateView = (TextView) view.findViewById(R.id.list_item_date);
-            readMoreView = (TextView) view.findViewById(R.id.list_item_read_more);
         }
     }
 
@@ -78,7 +77,7 @@ public class RssAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, final Context context, final Cursor cursor) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
-        
+
         String title = cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_TITLE));
         String date = cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_DATE));
         String descriptionHtml = cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_DESCRIPTION));
@@ -126,18 +125,21 @@ public class RssAdapter extends CursorAdapter {
             this.url = url;
         }
 
-        public void onClick(View paramView) {
-            Context localContext = paramView.getContext();
-            if ((localContext instanceof Activity)) {
-                Fragment DetailFragment = new RssDetailFragment();
-                Bundle localBundle = new Bundle();
-                localBundle.putString("url", this.url);
-                DetailFragment.setArguments(localBundle);
-                ((Activity)localContext).getFragmentManager()
-                    .beginTransaction()
-                    .addToBackStack("RssFeedFragment")
-                    .replace(R.id.fragment_container, DetailFragment)
-                .commit();
+        public void onClick(View view) {
+            Context context = view.getContext();
+            while (context instanceof ContextWrapper) {
+                if (context instanceof Activity) {
+                    Fragment DetailFragment = new RssDetailFragment();
+                    Bundle localBundle = new Bundle();
+                    localBundle.putString("url", this.url);
+                    DetailFragment.setArguments(localBundle);
+                    ((Activity) context).getFragmentManager()
+                            .beginTransaction()
+                            .addToBackStack("RssFeedFragment")
+                            .replace(R.id.fragment_container, DetailFragment)
+                            .commit();
+                }
+                context = ((ContextWrapper) context).getBaseContext();
             }
         }
     }
