@@ -2,47 +2,29 @@ package com.example.liding.rsshawk;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
-import android.text.ParcelableSpan;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.liding.rsshawk.Tasks.DownloadImageTask;
 import com.example.liding.rsshawk.data.RssContract;
 import com.squareup.picasso.Picasso;
 
 import org.xml.sax.XMLReader;
 
-import java.io.InputStream;
-import java.net.URL;
-
 public class RssAdapter extends CursorAdapter {
-
-    private MainActivityInterface mCallback;
 
     public static class ViewHolder {
         public final ImageView imageView;
@@ -60,9 +42,7 @@ public class RssAdapter extends CursorAdapter {
 
     public RssAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
-        mCallback = (MainActivityInterface) context;
     }
-
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -84,14 +64,14 @@ public class RssAdapter extends CursorAdapter {
 
         Spanned spannedDescription = Html.fromHtml(descriptionHtml, null, new Html.TagHandler()
         {
-            public void handleTag(boolean paramBoolean, String paramString, Editable paramEditable, XMLReader paramXMLReader)
-            {
-                ClickableSpan[] arrayOfClickableSpan = (ClickableSpan[])paramEditable.getSpans(0, paramEditable.length(), ClickableSpan.class);
-                if (arrayOfClickableSpan != null)
-                {
+            public void handleTag(
+                boolean paramBoolean, String paramString, Editable paramEditable, XMLReader paramXMLReader
+            ) {
+                ClickableSpan[] arrayOfClickableSpan =
+                    (ClickableSpan[])paramEditable.getSpans(0, paramEditable.length(), ClickableSpan.class);
+                if (arrayOfClickableSpan != null) {
                     int i = arrayOfClickableSpan.length;
-                    for (int j = 0; j < i; j++)
-                    {
+                    for (int j = 0; j < i; j++) {
                         ClickableSpan clickableSpan = arrayOfClickableSpan[j];
                         if (!(clickableSpan instanceof URLSpan))
                             continue;
@@ -108,7 +88,9 @@ public class RssAdapter extends CursorAdapter {
         });
 
         try {
-            Picasso.with(context).load(cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_IMAGE))).into(viewHolder.imageView);
+            Picasso.with(context)
+                .load(cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_IMAGE)))
+                .into(viewHolder.imageView);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -134,10 +116,10 @@ public class RssAdapter extends CursorAdapter {
                     localBundle.putString("url", this.url);
                     DetailFragment.setArguments(localBundle);
                     ((Activity) context).getFragmentManager()
-                            .beginTransaction()
-                            .addToBackStack("RssFeedFragment")
-                            .replace(R.id.fragment_container, DetailFragment)
-                            .commit();
+                        .beginTransaction()
+                        .addToBackStack("RssFeedFragment")
+                        .replace(R.id.fragment_container, DetailFragment)
+                        .commit();
                 }
                 context = ((ContextWrapper) context).getBaseContext();
             }

@@ -40,7 +40,7 @@ public class KotakuParser {
                 Log.d("!!!!!!!!!!!!!!!!!!!", "Shit happens! On " + title);
             }
             this.title = title;
-            this.description = convertFromHtmlToText(description);
+            this.description = removeImagesFromText(description);//convertFromHtmlToText(description);
             this.link = link;
             this.date = date;
         }
@@ -186,12 +186,12 @@ public class KotakuParser {
     }
 
 
-    public static String convertFromHtmlToText(String html) {
-        html = html.replaceAll("<([^a]*?)\\>"," ");//Removes all items in brackets
-        html = html.replaceAll("<([^a]*?)\\\n"," ");//Must be undeneath
-        html = html.replaceFirst("([^a]*?)\\>", " ");//Removes any connected item to the last bracket
-        html = html.replaceAll("&nbsp;"," ");
-        html = html.replaceAll("&amp;"," ");
-        return html;
-    }
+//    public static String convertFromHtmlToText(String html) {
+//        html = html.replaceAll("<([^a]*?)\\>"," ");//Removes all items in brackets
+//        html = html.replaceAll("<([^a]*?)\\\n"," ");//Must be undeneath
+//        html = html.replaceFirst("([^a]*?)\\>", " ");//Removes any connected item to the last bracket
+//        html = html.replaceAll("&nbsp;"," ");
+//        html = html.replaceAll("&amp;"," ");
+//        return html;
+//    }
 }
