@@ -7,6 +7,8 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,8 +28,8 @@ public class RssListFragment extends Fragment implements LoaderManager.LoaderCal
     private static final int RSS_LOADER = 0;
     private String mSortOrder = "ASC";
 
-    private ListView mRssListView;
-    private CursorAdapter mRssListAdapter;
+    private RecyclerView mRssListView;
+    private RssAdapter mRssListAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,9 +41,14 @@ public class RssListFragment extends Fragment implements LoaderManager.LoaderCal
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.rss_list, container, false);
 
-        mRssListAdapter = new RssAdapter(getActivity(), null, 0);
+        mRssListAdapter = new RssAdapter(null, getActivity());
 
-        mRssListView = (ListView) rootView.findViewById(R.id.rss_list);
+        mRssListView = (RecyclerView) rootView.findViewById(R.id.rss_list);
+
+        // use a linear layout manager
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        mRssListView.setLayoutManager(mLayoutManager);
+
         mRssListView.setAdapter(mRssListAdapter);
 
         return rootView;

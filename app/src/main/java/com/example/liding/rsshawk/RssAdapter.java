@@ -6,16 +6,17 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,51 +25,50 @@ import com.squareup.picasso.Picasso;
 
 import org.xml.sax.XMLReader;
 
-public class RssAdapter extends CursorAdapter {
+public class RssAdapter extends RecyclerView.Adapter<RssAdapter.ViewHolder> {
 
-    public static class ViewHolder {
-        public final ImageView imageView;
-        public final TextView titleView;
-        public final TextView descriptionView;
-        public final TextView dateView;
+    private Cursor mRssCursor;
+    private Context mContext;
 
-        public ViewHolder(View view) {
-            imageView = (ImageView) view.findViewById(R.id.list_item_image);
-            titleView = (TextView) view.findViewById(R.id.list_item_title);
-            descriptionView = (TextView) view.findViewById(R.id.list_item_description);
-            dateView = (TextView) view.findViewById(R.id.list_item_date);
-        }
-    }
-
-    public RssAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+    public RssAdapter(Cursor cursor, Context context){
+        mRssCursor = cursor;
+        mContext = context;
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = LayoutInflater.from(context).inflate(R.layout.rss_list_item, parent, false);
+    public RssAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view = LayoutInflater
+            .from(parent.getContext())
+            .inflate(viewType, parent, false);
 
         ViewHolder viewHolder = new ViewHolder(view);
-        view.setTag(viewHolder);
 
-        return view;
+        return viewHolder;
     }
 
     @Override
-    public void bindView(View view, final Context context, final Cursor cursor) {
-        ViewHolder viewHolder = (ViewHolder) view.getTag();
+    public void onBindViewHolder(RssAdapter.ViewHolder viewHolder, int position) {
 
-        String title = cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_TITLE));
-        String date = cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_DATE));
-        String descriptionHtml = cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_DESCRIPTION));
+        mRssCursor.moveToPosition(position);
+
+        String title = mRssCursor.getString(
+            mRssCursor.getColumnIndex(RssContract.RssEntry.COLUMN_TITLE)
+        );
+        String date = mRssCursor.getString(
+            mRssCursor.getColumnIndex(RssContract.RssEntry.COLUMN_DATE)
+        );
+        String descriptionHtml = mRssCursor.getString(
+            mRssCursor.getColumnIndex(RssContract.RssEntry.COLUMN_DESCRIPTION)
+        );
 
         Spanned spannedDescription = Html.fromHtml(descriptionHtml, null, new Html.TagHandler()
         {
             public void handleTag(
-                boolean paramBoolean, String paramString, Editable paramEditable, XMLReader paramXMLReader
+                    boolean paramBoolean, String paramString, Editable paramEditable, XMLReader paramXMLReader
             ) {
                 ClickableSpan[] arrayOfClickableSpan =
-                    (ClickableSpan[])paramEditable.getSpans(0, paramEditable.length(), ClickableSpan.class);
+                        (ClickableSpan[])paramEditable.getSpans(0, paramEditable.length(), ClickableSpan.class);
                 if (arrayOfClickableSpan != null) {
                     int i = arrayOfClickableSpan.length;
                     for (int j = 0; j < i; j++) {
@@ -76,10 +76,10 @@ public class RssAdapter extends CursorAdapter {
                         if (!(clickableSpan instanceof URLSpan))
                             continue;
                         paramEditable.setSpan(
-                            new DescriptionUrlSpan(((URLSpan) clickableSpan).getURL()),
-                            paramEditable.getSpanStart(clickableSpan),
-                            paramEditable.getSpanEnd(clickableSpan),
-                            Spanned.SPAN_POINT_MARK
+                                new DescriptionUrlSpan(((URLSpan) clickableSpan).getURL()),
+                                paramEditable.getSpanStart(clickableSpan),
+                                paramEditable.getSpanEnd(clickableSpan),
+                                Spanned.SPAN_POINT_MARK
                         );
                         paramEditable.removeSpan(clickableSpan);
                     }
@@ -88,9 +88,9 @@ public class RssAdapter extends CursorAdapter {
         });
 
         try {
-            Picasso.with(context)
-                .load(cursor.getString(cursor.getColumnIndex(RssContract.RssEntry.COLUMN_IMAGE)))
-                .into(viewHolder.imageView);
+            Picasso.with(mContext)
+                    .load(mRssCursor.getString(mRssCursor.getColumnIndex(RssContract.RssEntry.COLUMN_IMAGE)))
+                    .into(viewHolder.imageView);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -98,6 +98,39 @@ public class RssAdapter extends CursorAdapter {
         viewHolder.descriptionView.setMovementMethod(LinkMovementMethod.getInstance());
         viewHolder.titleView.setText(title);
         viewHolder.dateView.setText(date);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mRssCursor == null ? 0 : mRssCursor.getCount();
+    }
+
+    public Cursor swapCursor(Cursor cursor) {
+        Log.d("!!!!!!!", "swapCursor");
+        if (mRssCursor == cursor) {
+            return null;
+        }
+        Cursor oldCursor = mRssCursor;
+        this.mRssCursor = cursor;
+        if (cursor != null) {
+            this.notifyDataSetChanged();
+        }
+        return oldCursor;
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public ImageView imageView;
+        public TextView titleView;
+        public TextView descriptionView;
+        public TextView dateView;
+
+        public ViewHolder(View view) {
+            super(view);
+            imageView = (ImageView) view.findViewById(R.id.list_item_image);
+            titleView = (TextView) view.findViewById(R.id.list_item_title);
+            descriptionView = (TextView) view.findViewById(R.id.list_item_description);
+            dateView = (TextView) view.findViewById(R.id.list_item_date);
+        }
     }
 
     static public class DescriptionUrlSpan extends ClickableSpan {
@@ -123,6 +156,15 @@ public class RssAdapter extends CursorAdapter {
                 }
                 context = ((ContextWrapper) context).getBaseContext();
             }
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if((position % 2) > 0) {
+            return R.layout.rss_list_item_v1;
+        } else {
+            return R.layout.rss_list_item;
         }
     }
 }
